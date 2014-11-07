@@ -1,4 +1,4 @@
-package nearlab.erauvisit;
+package nearlab.erauvisit.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,6 +13,11 @@ import android.widget.TextView;
 
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.Region;
+
+import java.util.HashMap;
+
+import nearlab.erauvisit.Data.BeaconStructure;
+import nearlab.erauvisit.R;
 
 public class MonitoringActivity extends Activity {
 	protected static final String TAG = "MonitoringActivity";
@@ -64,7 +69,9 @@ public class MonitoringActivity extends Activity {
 
     public void didEnterRegion(Region region) {
         logToDisplay("I just saw a beacon named "+ region.getUniqueId() +" for the first time!" );
-        openWebPage(URI_beacon1);
+        String key = region.getUniqueId();
+        HashMap<String,BeaconStructure> mapKeyBeaconStruct= ErauVisit.getMapKeyBeaconStruct();
+        openWebPage(mapKeyBeaconStruct.get(key).getURL());
     }
 
     public void didExitRegion(Region region) {

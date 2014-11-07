@@ -1,4 +1,4 @@
-package nearlab.erauvisit;
+package nearlab.erauvisit.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.Region;
 
 import java.util.Collection;
+
+import nearlab.erauvisit.R;
 
 public class RangingActivity extends Activity {
     protected static final String TAG = "RangingActivity";

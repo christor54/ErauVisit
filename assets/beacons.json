@@ -1,0 +1,31 @@
+{
+	"beacon_1" :
+	{
+		"uuid": "e2a39f4-73f5-4bc4-a12f-17d1ad7a961",
+		"major" : 1,
+		"minor" : 1,
+		"URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_1.html"
+	},
+	"beacon_2" :
+	{
+		"uuid": "e2a39f4-73f5-4bc4-a12f-17d1ad7a961",
+		"major" : 1,
+		"minor" : 2,
+		"URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_2.html"	
+	},
+	"beacon_3" :
+	{
+		"uuid": "e2a39f4-73f5-4bc4-a12f-17d1ad7a961",
+		"major" : 1,
+		"minor" : 3,
+		"URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_3.html"	
+	},
+	"beacon_4" :
+	{
+		"uuid": "e2a39f4-73f5-4bc4-a12f-17d1ad7a961",
+		"major" : 1,
+		"minor" : 4,
+		"URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_4.html"	
+	}
+	
+}
