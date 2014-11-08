@@ -37,10 +37,9 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 	private static final String TAG = "ErauVisit";
     private static boolean goOn=false;
     private static final String beacons_json_file_url="http://earl.erau.edu/lab/ibeacon/beacons.json";
-    private String mJson;
 	private BeaconManager mBeaconManager;
     List<Region> listRegions= new ArrayList<Region>();
-    List<String> mkeys= new ArrayList<String>();
+
 	private MonitoringActivity mMonitoringActivity;
 	private RangingActivity mRangingActivity;
 	private BackgroundPowerSaver mBackgroundPowerSaver;
@@ -48,61 +47,51 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 	@SuppressWarnings("unused")
 	private RegionBootstrap mRegionBootstrap;
 
+    //"Local variables" made global
+    List<String> mkeys= new ArrayList<String>();
+    private static final boolean do_download_json = false;
+
 	@Override 
 	public void onCreate() {
+        String mJson;
+
+        //Get the json file with the beacon structures
+        if (do_download_json){
+            mJson = downloadJSONFromServer();
+        }
+        else {
+            mJson = loadJSONFromRaw();
+        }
+
+        //Create the map mapKeyBeaconStruct from the json file
+        createMapKeyBeaconStruct(mJson);
+
+        //Create listRegions with the map and affect it to
+        createListRegions();
+
+        mRegionBootstrap = new RegionBootstrap(this, listRegions);
+
+        //Create mBeaconManager with increased scan frequency
+        createBeaconManager();
+
+        mBackgroundPowerSaver = new BackgroundPowerSaver(this);
+
+	}
+
+    private String downloadJSONFromServer() {
+        String mJson=null;
         try {
-            mJson= new DownloadTask(getApplicationContext()).execute(beacons_json_file_url).get();
-            Log.i("just got json string",mJson);
+            mJson = new DownloadTask(getApplicationContext()).execute(beacons_json_file_url).get();
+            Log.i("just got json string", mJson);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        try {
-//            String json = loadJSONFromRaw();
-            JSONObject jObject = new JSONObject(mJson);
-            Iterator<String> keys=  jObject.keys();
-            while(keys.hasNext()){
-                String key = (String) keys.next();
-                Log.i("JSON key", key);
-                if (jObject.get(key) instanceof JSONObject) {
-                    JSONObject jObj= (JSONObject) jObject.get(key);
-                    BeaconStructure beaconStructure = new BeaconStructure();
-                    beaconStructure.setUUID((String) jObj.get("uuid"));
-                    beaconStructure.setMajor((Integer) jObj.get("major"));
-                    beaconStructure.setMinor((Integer) jObj.get("minor"));
-                    beaconStructure.setURL((String) jObj.get("URL"));
-                    mapKeyBeaconStruct.put(key, beaconStructure);
-                    mkeys.add(key);
-                }
-            }
-        } catch (JSONException e) {
-            if (e != null) {
-                Log.e("e", "e is not null, toString is " + e + " and message is " + e.getMessage());
-            }
-        }
+        return mJson;
+    }
 
-        for(int i=0; i<mkeys.size();i++ ) {
-            String key =mkeys.get(i);
-            BeaconStructure beaconStructure = mapKeyBeaconStruct.get(key);
-            Region region = new Region(key, Identifier.parse(beaconStructure.getUUID()),
-                    Identifier.parse(String.valueOf(beaconStructure.getMajor())),
-                    Identifier.parse(String.valueOf(beaconStructure.getMinor())));
-            listRegions.add(region);
-        }
-
-        mBeaconManager = BeaconManager.getInstanceForApplication(this);
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
-        mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-        mBeaconManager.setForegroundScanPeriod(BeaconManager.DEFAULT_FOREGROUND_SCAN_PERIOD/5);
-        mBeaconManager.setBackgroundScanPeriod(BeaconManager.DEFAULT_BACKGROUND_SCAN_PERIOD/5);
-		mBackgroundPowerSaver = new BackgroundPowerSaver(this);
-
-        mRegionBootstrap = new RegionBootstrap(this, listRegions);
-
-	}
-	
-	@Override
+    @Override
 	public void didRangeBeaconsInRegion(Collection<Beacon> arg0, Region arg1) {
 		if (mRangingActivity != null) {
 			mRangingActivity.didRangeBeaconsInRegion(arg0, arg1);
@@ -138,6 +127,53 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 			mMonitoringActivity.didExitRegion(arg0);
 		}				
 	}
+
+
+    //Util methods
+
+    private void createBeaconManager() {
+        mBeaconManager = BeaconManager.getInstanceForApplication(this);
+        mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+        mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+        mBeaconManager.setForegroundScanPeriod(BeaconManager.DEFAULT_FOREGROUND_SCAN_PERIOD/5);
+        mBeaconManager.setBackgroundScanPeriod(BeaconManager.DEFAULT_BACKGROUND_SCAN_PERIOD/5);
+    }
+
+    private void createListRegions() {
+        for(int i=0; i<mkeys.size();i++ ) {
+            String key =mkeys.get(i);
+            BeaconStructure beaconStructure = mapKeyBeaconStruct.get(key);
+            Region region = new Region(key, Identifier.parse(beaconStructure.getUUID()),
+                    Identifier.parse(String.valueOf(beaconStructure.getMajor())),
+                    Identifier.parse(String.valueOf(beaconStructure.getMinor())));
+            listRegions.add(region);
+        }
+    }
+
+    private void createMapKeyBeaconStruct(String mJson) {
+        try {
+            JSONObject jObject = new JSONObject(mJson);
+            Iterator<String> keys=  jObject.keys();
+            while(keys.hasNext()){
+                String key = (String) keys.next();
+                Log.i("JSON key", key);
+                if (jObject.get(key) instanceof JSONObject) {
+                    JSONObject jObj= (JSONObject) jObject.get(key);
+                    BeaconStructure beaconStructure = new BeaconStructure();
+                    beaconStructure.setUUID((String) jObj.get("uuid"));
+                    beaconStructure.setMajor((Integer) jObj.get("major"));
+                    beaconStructure.setMinor((Integer) jObj.get("minor"));
+                    beaconStructure.setURL((String) jObj.get("URL"));
+                    mapKeyBeaconStruct.put(key, beaconStructure);
+                    mkeys.add(key);
+                }
+            }
+        } catch (JSONException e) {
+            if (e != null) {
+                Log.e("e", "e is not null, toString is " + e + " and message is " + e.getMessage());
+            }
+        }
+    }
 
     public String loadJSONFromAsset() {
         String json = null;
@@ -180,7 +216,6 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 	public void setRangingActivity(RangingActivity activity) {
 		mRangingActivity = activity;
 	}
-
 
     public ArrayList<String> makeLineIntoStrings(File file) {
         Scanner sc;

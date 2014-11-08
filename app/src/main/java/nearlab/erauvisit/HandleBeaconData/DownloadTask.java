@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import nearlab.erauvisit.activity.ErauVisit;
-
 public class DownloadTask extends AsyncTask <String, Integer, String>{
     private NotificationHelper mNotificationHelper;
     private File beacons_json_file ;
@@ -88,12 +86,12 @@ public class DownloadTask extends AsyncTask <String, Integer, String>{
     protected void onProgressUpdate(Integer... progress) {
         //This method runs on the UI thread, it receives progress updates
         //from the background thread and publishes them to the status bar
-        mNotificationHelper.progressUpdate(progress[0]);
+        //mNotificationHelper.progressUpdate(progress[0]);
     }
     protected void onPostExecute(Void result)    {
         //The task is complete, tell the status bar about it
-        mNotificationHelper.completed();
-        ErauVisit.setGoOn(true);
+       // mNotificationHelper.completed();
+      //  ErauVisit.setGoOn(true);
     }
 
     public ArrayList<String> makeLineIntoStrings(File file) {
