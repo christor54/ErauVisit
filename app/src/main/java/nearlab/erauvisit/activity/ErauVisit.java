@@ -34,7 +34,7 @@ import nearlab.erauvisit.HandleBeaconData.DownloadTask;
 import nearlab.erauvisit.R;
 
 public class ErauVisit extends Application implements BootstrapNotifier, RangeNotifier {
-    private static final boolean do_download_json = true;
+    private static final boolean do_download_json = false;
 
 	private static final String TAG = "ErauVisit";
     private static boolean goOn=false;
@@ -166,6 +166,7 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
                     beaconStructure.setMajor((Integer) jObj.get("major"));
                     beaconStructure.setMinor((Integer) jObj.get("minor"));
                     beaconStructure.setURL((String) jObj.get("URL"));
+                    beaconStructure.setContentText1((String) jObj.get("contentText1"));
                     mapKeyBeaconStruct.put(key, beaconStructure);
                     mkeys.add(key);
                 }

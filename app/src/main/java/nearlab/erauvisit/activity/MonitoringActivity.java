@@ -57,16 +57,6 @@ public class MonitoringActivity extends Activity {
     	getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
     }    
-    
-    private void logToDisplay(final String line) {
-    	runOnUiThread(new Runnable() {
-    	    public void run() {
-    	    	monitoring_text_textview = (TextView)MonitoringActivity.this
-    					.findViewById(R.id.monitoringText);
-                monitoring_text_textview.append(line+"\n");
-    	    }
-    	});
-    }
 
     public void didEnterRegion(Region region) {
         monitor_text= "I just saw a beacon named "+ region.getUniqueId() +" for the first time!";
@@ -83,18 +73,6 @@ public class MonitoringActivity extends Activity {
         isInRegion=false;
     }
 
-    public void didDetermineStateForRegion(int state, Region region) {
-    	logToDisplay("I have just switched from seeing/not seeing beacons: "+state);
-    }
-
-    public void openWebPage(String url) {
-        Uri webpage = Uri.parse(url);
-        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -108,6 +86,29 @@ public class MonitoringActivity extends Activity {
         // Save the values you need from your textview into "outState"-object
         super.onSaveInstanceState(outState);
         webView.saveState(outState);
+    }
+
+
+    public void didDetermineStateForRegion(int state, Region region) {
+    	logToDisplay("I have just switched from seeing/not seeing beacons: "+state);
+    }
+
+    private void logToDisplay(final String line) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                monitoring_text_textview = (TextView)MonitoringActivity.this
+                        .findViewById(R.id.monitoringText);
+                monitoring_text_textview.append(line+"\n");
+            }
+        });
+    }
+
+    public void openWebPage(String url) {
+        Uri webpage = Uri.parse(url);
+        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     private void openWebPageInWebView(final String url1) {
