@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import org.altbeacon.beacon.BeaconManager;
@@ -22,15 +23,19 @@ import nearlab.erauvisit.R;
 public class MonitoringActivity extends Activity {
 	protected static final String TAG = "MonitoringActivity";
     private BeaconManager beaconManager;
-    private String URI_beacon1= "http://www.near.aero/current/bio_mohamedm.html";
-    private String URI_beacon2= "";
+    private WebView webView;
+    private TextView monitoring_text_textview;
+    private boolean isInRegion= false;
+    private String monitor_text;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_monitoring);
-		verifyBluetooth();
-
+        webView= (WebView) this.findViewById(R.id.webView);
+        if (savedInstanceState != null)
+            webView.restoreState(savedInstanceState);
+        verifyBluetooth();
 	}
 
 	public void onRangingClicked(View view) {
@@ -38,10 +43,6 @@ public class MonitoringActivity extends Activity {
 		this.startActivity(myIntent);
 	}
 
-    @Override 
-    protected void onDestroy() {
-        super.onDestroy();
-    }
     @Override 
     protected void onPause() {
     	super.onPause();
@@ -60,22 +61,26 @@ public class MonitoringActivity extends Activity {
     private void logToDisplay(final String line) {
     	runOnUiThread(new Runnable() {
     	    public void run() {
-    	    	TextView editText = (TextView)MonitoringActivity.this
+    	    	monitoring_text_textview = (TextView)MonitoringActivity.this
     					.findViewById(R.id.monitoringText);
-       	    	editText.append(line+"\n");            	    	    		
+                monitoring_text_textview.append(line+"\n");
     	    }
     	});
     }
 
     public void didEnterRegion(Region region) {
-        logToDisplay("I just saw a beacon named "+ region.getUniqueId() +" for the first time!" );
+        monitor_text= "I just saw a beacon named "+ region.getUniqueId() +" for the first time!";
+        logToDisplay(monitor_text);
+        isInRegion=true;
         String key = region.getUniqueId();
         HashMap<String,BeaconStructure> mapKeyBeaconStruct= ErauVisit.getMapKeyBeaconStruct();
-        openWebPage(mapKeyBeaconStruct.get(key).getURL());
+        openWebPageInWebView(mapKeyBeaconStruct.get(key).getURL());
     }
 
     public void didExitRegion(Region region) {
-    	logToDisplay("I no longer see a beacon named "+ region.getUniqueId());
+        monitor_text= "I no longer see a beacon named "+ region.getUniqueId();
+        logToDisplay(monitor_text);
+        isInRegion=false;
     }
 
     public void didDetermineStateForRegion(int state, Region region) {
@@ -88,6 +93,35 @@ public class MonitoringActivity extends Activity {
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Read values from the "savedInstanceState"-object and put them in your textview
+        if (savedInstanceState != null)
+            webView.restoreState(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // Save the values you need from your textview into "outState"-object
+        super.onSaveInstanceState(outState);
+        webView.saveState(outState);
+    }
+
+    private void openWebPageInWebView(final String url1) {
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                webView.loadUrl(url1);
+            }
+        });
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
     }
 
     private void verifyBluetooth() {

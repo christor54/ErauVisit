@@ -22,10 +22,10 @@ public class DownloadTask extends AsyncTask <String, Integer, String>{
         mNotificationHelper = new NotificationHelper(context);
     }
 
-    protected void onPreExecute(){
-        //Create the notification in the statusbar
-        mNotificationHelper.createNotification();
-    }
+//    protected void onPreExecute(){
+//        //Create the notification in the statusbar
+//        mNotificationHelper.createNotification();
+//    }
 
     @Override
     protected String doInBackground(String... Urls) {

@@ -34,6 +34,8 @@ import nearlab.erauvisit.HandleBeaconData.DownloadTask;
 import nearlab.erauvisit.R;
 
 public class ErauVisit extends Application implements BootstrapNotifier, RangeNotifier {
+    private static final boolean do_download_json = true;
+
 	private static final String TAG = "ErauVisit";
     private static boolean goOn=false;
     private static final String beacons_json_file_url="http://earl.erau.edu/lab/ibeacon/beacons.json";
@@ -49,7 +51,7 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 
     //"Local variables" made global
     List<String> mkeys= new ArrayList<String>();
-    private static final boolean do_download_json = false;
+
 
 	@Override 
 	public void onCreate() {
