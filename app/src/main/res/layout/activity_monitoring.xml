@@ -8,9 +8,14 @@
         android:id="@+id/monitoringText"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:text=" Hi, I will be your guide for the visit"
         android:ems="10"
-        android:gravity="left|top"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:textColor="@color/off_white"
+        android:gravity="center"
         android:inputType="textMultiLine"
+        android:background="@color/dark_blue"
         android:layout_alignParentTop="true"
         android:layout_alignEnd="@+id/Button01">
 
@@ -31,6 +36,7 @@
         android:layout_height="wrap_content"
         android:onClick="onRangingClicked"
         android:text="Range"
+        android:background="#1d45b4e7"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
 

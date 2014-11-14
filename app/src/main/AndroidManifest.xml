@@ -3,8 +3,10 @@
     package="nearlab.erauvisit" >
 
     <application
+        android:icon="@drawable/eagle_icon"
+        android:label="@string/app_name"
+        android:launchMode="singleInstance"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
         android:name=".activity.ErauVisit"
         android:theme="@style/AppTheme">
         <activity

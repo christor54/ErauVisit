@@ -12,21 +12,29 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.Region;
 
-import java.util.HashMap;
+import java.util.Collection;
 
 import nearlab.erauvisit.Data.BeaconStructure;
 import nearlab.erauvisit.R;
 
 public class MonitoringActivity extends Activity {
 	protected static final String TAG = "MonitoringActivity";
+
+    private final static String NO_BEACON_MESSAGE = "keep visiting, I will guide you";
+    private final static String DEFAULT_URL ="http://cdn.stateuniversity.com/assets/logos/images/11938/large_db-map.jpg";
+
+    private Beacon lastBeacon;
+    static boolean isActive =false;
     private BeaconManager beaconManager;
     private WebView webView;
     private TextView monitoring_text_textview;
     private boolean isInRegion= false;
     private String monitor_text;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
@@ -36,6 +44,7 @@ public class MonitoringActivity extends Activity {
         if (savedInstanceState != null)
             webView.restoreState(savedInstanceState);
         verifyBluetooth();
+        isActive =true;
 	}
 
 	public void onRangingClicked(View view) {
@@ -56,19 +65,51 @@ public class MonitoringActivity extends Activity {
     	((ErauVisit)this.getApplication()).setMonitoringActivity(this);
     	getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-    }    
-
-    public void didEnterRegion(Region region) {
-        monitor_text= "I just saw a beacon named "+ region.getUniqueId() +" for the first time!";
-        logToDisplay(monitor_text);
-        isInRegion=true;
-        String key = region.getUniqueId();
-        HashMap<String,BeaconStructure> mapKeyBeaconStruct= ErauVisit.getMapKeyBeaconStruct();
-        openWebPageInWebView(mapKeyBeaconStruct.get(key).getURL());
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isActive =true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActive = false;
+    }
+
+    public void didEnterRegion(Region region) {
+      //  BeaconStructure bs= ErauVisit.getBSFromRegion(region);
+       // monitor_text=bs.getContentText1();
+        //logToDisplay(monitor_text);
+        //openWebPageInWebView(bs.getURL());
+    }
+
+    public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+        if (beacons.size() > 0) {
+            for (Beacon beacon: beacons) {
+
+                if(region.matchesBeacon(beacon)&&beacon.getDistance()<=ErauVisit.getBSFromRegion(region).getRange()) {
+//                    boolean goOn=false;
+                    BeaconStructure bs = ErauVisit.getBSFromRegion(region);
+                    monitor_text = bs.getContentText1();
+                    logToDisplay(monitor_text);
+                    openWebPageInWebView(bs.getURL());
+
+                }
+                else{
+                    monitor_text=NO_BEACON_MESSAGE;
+                    logToDisplay(monitor_text);
+                    openWebPageInWebView(DEFAULT_URL);
+                }
+            }
+        }
+    }
+
+
     public void didExitRegion(Region region) {
-        monitor_text= "I no longer see a beacon named "+ region.getUniqueId();
+        monitor_text= "Keep visiting I will guide you";
         logToDisplay(monitor_text);
         isInRegion=false;
     }
@@ -98,7 +139,7 @@ public class MonitoringActivity extends Activity {
             public void run() {
                 monitoring_text_textview = (TextView)MonitoringActivity.this
                         .findViewById(R.id.monitoringText);
-                monitoring_text_textview.append(line+"\n");
+                monitoring_text_textview.setText(monitor_text);
             }
         });
     }

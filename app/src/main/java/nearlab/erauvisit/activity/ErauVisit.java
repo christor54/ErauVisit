@@ -95,9 +95,12 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 
     @Override
 	public void didRangeBeaconsInRegion(Collection<Beacon> arg0, Region arg1) {
-		if (mRangingActivity != null) {
-			mRangingActivity.didRangeBeaconsInRegion(arg0, arg1);
+		if (mMonitoringActivity != null) {
+            mMonitoringActivity.didRangeBeaconsInRegion(arg0, arg1);
 		}
+        if (mRangingActivity != null) {
+            mRangingActivity.didRangeBeaconsInRegion(arg0, arg1);
+        }
 		
 	}
 
@@ -111,7 +114,7 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 	public void didEnterRegion(Region arg0) {
 		if (mMonitoringActivity != null) {
 			mMonitoringActivity.didEnterRegion(arg0);
-		}		
+		}
 		try {
             String line =" entered region";
 			Log.d(TAG, "entered region.  starting ranging");
@@ -121,6 +124,12 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 		} catch (RemoteException e) {
 			Log.e(TAG, "Cannot start ranging");
 		}
+//        if(!MonitoringActivity.isActive) {
+//            Intent intent = new Intent(this, MonitoringActivity.class);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            // Important:  make sure to add android:launchMode="singleInstance" in the manifest to keep multiple copies of this activity from getting created if the user has  already manually launched the app.
+//            this.startActivity(intent);
+//        }
 	}
 
 	@Override
@@ -165,8 +174,10 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
                     beaconStructure.setUUID((String) jObj.get("uuid"));
                     beaconStructure.setMajor((Integer) jObj.get("major"));
                     beaconStructure.setMinor((Integer) jObj.get("minor"));
+                    beaconStructure.setRange((Integer) jObj.get("required_distance"));
                     beaconStructure.setURL((String) jObj.get("URL"));
                     beaconStructure.setContentText1((String) jObj.get("contentText1"));
+
                     mapKeyBeaconStruct.put(key, beaconStructure);
                     mkeys.add(key);
                 }
@@ -247,6 +258,11 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 
     public static void setMapKeyBeaconStruct(HashMap<String, BeaconStructure> mapKeyBeaconStruct) {
         ErauVisit.mapKeyBeaconStruct = mapKeyBeaconStruct;
+    }
+
+    public static BeaconStructure getBSFromRegion(Region region){
+        String key = region.getUniqueId();
+        return mapKeyBeaconStruct.get(key);
     }
 
     public static boolean isGoOn() {

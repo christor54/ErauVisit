@@ -69,4 +69,12 @@ public class BeaconStructure {
     public void setContentText1(String contentText1) {
         this.contentText1 = contentText1;
     }
+
+    public int getRange() {
+        return range;
+    }
+
+    public void setRange(int range) {
+        this.range = range;
+    }
 }
