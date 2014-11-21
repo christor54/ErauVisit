@@ -8,7 +8,7 @@ public class BeaconStructure {
     private String UUID ;
     private int major;
     private int minor;
-    private int range;
+    private double range;
     private String URL;
     private String contentText1;
 
@@ -70,11 +70,11 @@ public class BeaconStructure {
         this.contentText1 = contentText1;
     }
 
-    public int getRange() {
+    public double getRange() {
         return range;
     }
 
-    public void setRange(int range) {
+    public void setRange(double range) {
         this.range = range;
     }
 }

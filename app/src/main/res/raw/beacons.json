@@ -4,8 +4,8 @@
 		"uuid": "e20a39f4-73f5-4bc4-a12f-17d1ad07a961",
 		"major" : 1,
 		"minor" : 1,
-		"required_distance" : 2,
-		"URL":"http://www.near.aero/current/index.html",
+		"required_distance" : 2.0,
+		"URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_1.html",
 		"contentText1":"Welcome to the NEAR Lab"
 	},
 	"beacon_2" :
@@ -13,8 +13,8 @@
 		"uuid": "e20a39f4-73f5-4bc4-a12f-17d1ad07a961",
 		"major" : 1,
 		"minor" : 2,
-		"required_distance" : 2,
-        "URL":"http://www.businessinsider.com/beacons-and-ibeacons-create-a-new-market-2013-12",
+		"required_distance" : 2.0,
+        "URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_2.html",
         "contentText1":"In your left is the iBeacon project"
 	},
 	"beacon_3" :
@@ -22,7 +22,7 @@
 		"uuid": "e20a39f4-73f5-4bc4-a12f-17d1ad07a961",
 		"major" : 1,
 		"minor" : 3,
-		"required_distance" : 3,
+		"required_distance" : 3.0,
 		"URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_3.html",
 		"contentText1":" "
 	},
@@ -31,7 +31,7 @@
 		"uuid": "e20a39f4-73f5-4bc4-a12f-17d1ad07a961",
 		"major" : 1,
 		"minor" : 4,
-		"required_distance" : 3,
+		"required_distance" : 3.0,
 		"URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_4.html",
 		"contentText1":" "
 	}

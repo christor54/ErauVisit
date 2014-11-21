@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.altbeacon.beacon.Beacon;
@@ -24,33 +25,53 @@ import nearlab.erauvisit.R;
 public class MonitoringActivity extends Activity {
 	protected static final String TAG = "MonitoringActivity";
 
+    private final static String WELCOME_MESSAGE = "Hi, I will be your guide for the visit :) " +"\n"+"Move around, I will show you cool stuff !";
     private final static String NO_BEACON_MESSAGE = "keep visiting, I will guide you";
-    private final static String DEFAULT_URL ="http://cdn.stateuniversity.com/assets/logos/images/11938/large_db-map.jpg";
+
 
     private Beacon lastBeacon;
     static boolean isActive =false;
+
     private BeaconManager beaconManager;
     private WebView webView;
     private TextView monitoring_text_textview;
-    private boolean isInRegion= false;
-    private String monitor_text;
+    private Button backButton;
+
+    private String last_monitor_text;
+    private String lastURL;
+    private static Beacon closestBeacon=null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
+        verifyBluetooth();
 		setContentView(R.layout.activity_monitoring);
         webView= (WebView) this.findViewById(R.id.webView);
+        backButton = (Button)this.findViewById(R.id.go_back_map);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                displayDefaultView();
+            }
+        });
         if (savedInstanceState != null)
             webView.restoreState(savedInstanceState);
-        verifyBluetooth();
+        else {
+            logToDisplay(WELCOME_MESSAGE);
+            openWebPageInWebView(ErauVisit.DEFAUT_PAGE_URL);
+        }
         isActive =true;
 	}
 
 	public void onRangingClicked(View view) {
-		Intent myIntent = new Intent(this, RangingActivity.class);
-		this.startActivity(myIntent);
+        Intent myIntent = new Intent(this, RangingActivity.class);
+        this.startActivity(myIntent);
 	}
+
+    public void onGoBackMapClicked(View view) {
+        Intent myIntent = new Intent(this, RangingActivity.class);
+        this.startActivity(myIntent);
+    }
 
     @Override 
     protected void onPause() {
@@ -87,31 +108,96 @@ public class MonitoringActivity extends Activity {
     }
 
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+        BeaconStructure bs;
+        Beacon beaconAnalyzed;
+        String currentURL,monitor_text;
+
+       //Find the closest beacon
         if (beacons.size() > 0) {
-            for (Beacon beacon: beacons) {
-
-                if(region.matchesBeacon(beacon)&&beacon.getDistance()<=ErauVisit.getBSFromRegion(region).getRange()) {
-//                    boolean goOn=false;
-                    BeaconStructure bs = ErauVisit.getBSFromRegion(region);
-                    monitor_text = bs.getContentText1();
+            beaconAnalyzed=findBeaconAnalyzed(beacons,region);
+            if(beaconAnalyzed!=null&&isTheClosestBeacon(beaconAnalyzed)){
+                bs = ErauVisit.getBSFromRegion(region);
+                monitor_text = bs.getContentText1();
+                currentURL = bs.getURL();
+                if(lastURL!=null&&!currentURL.equals(lastURL)) {//IF the web page to displayed was not already displayed
                     logToDisplay(monitor_text);
-                    openWebPageInWebView(bs.getURL());
-
-                }
-                else{
-                    monitor_text=NO_BEACON_MESSAGE;
-                    logToDisplay(monitor_text);
-                    openWebPageInWebView(DEFAULT_URL);
+                    openWebPageInWebView(currentURL);
                 }
             }
+
+//            //Check that the beacon is within the required distance
+//            if(closestBeacon!=null) {
+//                if (region.matchesBeacon(closestBeacon) && closestBeacon.getDistance() <= ErauVisit.getBSFromRegion(region).getRange()) {
+//;
+//                } else {
+//                    if (closestBeacon.getDistance() < (ErauVisit.getBSFromRegion(region).getRange() * 1.35))
+//                        ;
+//                    else {
+//                        monitor_text = NO_BEACON_MESSAGE;
+//                        currentURL = ErauVisit.DEFAUT_PAGE_URL;
+//                    }
+//                }
+//            }
         }
+    }
+
+    public static boolean isTheClosestBeacon(Beacon beaconAnalyzed) {
+        boolean response;
+        if(closestBeacon!=null) {
+            if (beaconAnalyzed.getDistance() <= closestBeacon.getDistance()) {
+                closestBeacon = beaconAnalyzed;
+            }
+            if(areBeaconsEquals(beaconAnalyzed,closestBeacon)){
+                response=true;
+            } else {
+                response = false;
+            }
+        }
+        else {
+            response=false;
+            closestBeacon=beaconAnalyzed;
+        }
+        return response;
+    }
+
+    private static boolean areBeaconsEquals(Beacon beaconAnalyzed, Beacon closestBeacon) {
+        boolean areEquals=true;
+        for(int i=1;i<3;i++){
+            if(beaconAnalyzed.getIdentifier(i)!=closestBeacon.getIdentifier(i)){
+                areEquals=false;
+            }
+        }
+        return areEquals;
+    }
+
+
+    private boolean isTheClosestBeaconWithinTheList(Collection<Beacon> beacons, Beacon beaconAnalyzed) {
+        Beacon closestBeacon=beaconAnalyzed;
+        Double minDistance=100.0;
+        for(Beacon beacon:beacons){
+            if(beacon.getDistance()<minDistance){
+                minDistance=beacon.getDistance();
+            }
+        }
+        if(beaconAnalyzed.getDistance()== minDistance)
+            return true;
+        else
+            return false;
+    }
+
+    public static Beacon findBeaconAnalyzed(Collection<Beacon> beacons, Region region) {
+        Beacon beaconMatchingRegion=null;
+        for(Beacon beacon:beacons){
+            if(region.matchesBeacon(beacon)){
+                beaconMatchingRegion=beacon;
+            }
+        }
+        return beaconMatchingRegion;
     }
 
 
     public void didExitRegion(Region region) {
-        monitor_text= "Keep visiting I will guide you";
-        logToDisplay(monitor_text);
-        isInRegion=false;
+        displayDefaultView();
     }
 
     @Override
@@ -139,9 +225,10 @@ public class MonitoringActivity extends Activity {
             public void run() {
                 monitoring_text_textview = (TextView)MonitoringActivity.this
                         .findViewById(R.id.monitoringText);
-                monitoring_text_textview.setText(monitor_text);
+                monitoring_text_textview.setText(line);
             }
         });
+        last_monitor_text=line;
     }
 
     public void openWebPage(String url) {
@@ -157,13 +244,38 @@ public class MonitoringActivity extends Activity {
             @Override
             public void run() {
                 webView.loadUrl(url1);
+                if (url1 != ErauVisit.DEFAUT_PAGE_URL)
+                    backButton.setVisibility(View.VISIBLE);
+                else
+                    backButton.setVisibility(View.GONE);
             }
         });
+        lastURL=url1;
+
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        });
+
+
+
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
+    }
+
+    private void displayDefaultView() {
+        String currentURL,monitor_text;
+        currentURL = ErauVisit.DEFAUT_PAGE_URL;
+        monitor_text = NO_BEACON_MESSAGE;
+        logToDisplay( monitor_text);
+        openWebPageInWebView(ErauVisit.DEFAUT_PAGE_URL);
+        lastURL = currentURL;
+        last_monitor_text= monitor_text;
     }
 
     private void verifyBluetooth() {

@@ -35,10 +35,17 @@ import nearlab.erauvisit.R;
 
 public class ErauVisit extends Application implements BootstrapNotifier, RangeNotifier {
     private static final boolean do_download_json = false;
+    private static final boolean USE_LOCAL_SERVER = false;
+    //192.168.2.
+    private static final String LOCAL_SERVER_URL = "http://10.33.93.176/erauvisit.com/";
+    private static final String ERAU_SERVER_URL_JSON = "http://earl.erau.edu/lab/ibeacon/";
 
-	private static final String TAG = "ErauVisit";
+    private final static String NO_LOCAL_SERVER_WELCOME_PAGE_URL ="http://cdn.stateuniversity.com/assets/logos/images/11938/large_db-map.jpg";
+
+    public static String DEFAUT_PAGE_URL;
+    private static final String TAG = "ErauVisit";
     private static boolean goOn=false;
-    private static final String beacons_json_file_url="http://earl.erau.edu/lab/ibeacon/beacons.json";
+    private static String beacons_json_file_url;
 	private BeaconManager mBeaconManager;
     List<Region> listRegions= new ArrayList<Region>();
 
@@ -47,14 +54,23 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 	private BackgroundPowerSaver mBackgroundPowerSaver;
     private static HashMap <String,BeaconStructure> mapKeyBeaconStruct = new HashMap<String, BeaconStructure>();
 	@SuppressWarnings("unused")
-	private RegionBootstrap mRegionBootstrap;
+	private static RegionBootstrap mRegionBootstrap;
 
     //"Local variables" made global
     List<String> mkeys= new ArrayList<String>();
 
-
 	@Override 
 	public void onCreate() {
+        if(USE_LOCAL_SERVER){
+            beacons_json_file_url=LOCAL_SERVER_URL+"beacons.json";
+            DEFAUT_PAGE_URL =LOCAL_SERVER_URL+"welcome_page.html";
+        }
+        else {
+            beacons_json_file_url = ERAU_SERVER_URL_JSON+"/beacons.json";
+            DEFAUT_PAGE_URL =NO_LOCAL_SERVER_WELCOME_PAGE_URL;
+        }
+        beacons_json_file_url=beacons_json_file_url+"/beacons.json";
+
         String mJson;
 
         //Get the json file with the beacon structures
@@ -95,6 +111,11 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 
     @Override
 	public void didRangeBeaconsInRegion(Collection<Beacon> arg0, Region arg1) {
+       /*http://altbeacon.github.io/android-beacon-library/javadoc/index.html?org/altbeacon/beacon/RangeNotifier.html
+         Called once per second to give an estimate of the mDistance to visible beacons
+        Parameters:
+        beacons - a collection of Beacon objects that have been seen in the past second
+        region - the Region object that defines the criteria for the ranged beacons*/
 		if (mMonitoringActivity != null) {
             mMonitoringActivity.didRangeBeaconsInRegion(arg0, arg1);
 		}
@@ -146,8 +167,8 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
         mBeaconManager = BeaconManager.getInstanceForApplication(this);
         mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
         mBeaconManager.getBeaconParsers().add(new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-        mBeaconManager.setForegroundScanPeriod(BeaconManager.DEFAULT_FOREGROUND_SCAN_PERIOD/5);
-        mBeaconManager.setBackgroundScanPeriod(BeaconManager.DEFAULT_BACKGROUND_SCAN_PERIOD/5);
+//        mBeaconManager.setForegroundScanPeriod(BeaconManager.DEFAULT_FOREGROUND_SCAN_PERIOD/5);
+//        mBeaconManager.setBackgroundScanPeriod(BeaconManager.DEFAULT_BACKGROUND_SCAN_PERIOD/3);
     }
 
     private void createListRegions() {
@@ -174,7 +195,7 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
                     beaconStructure.setUUID((String) jObj.get("uuid"));
                     beaconStructure.setMajor((Integer) jObj.get("major"));
                     beaconStructure.setMinor((Integer) jObj.get("minor"));
-                    beaconStructure.setRange((Integer) jObj.get("required_distance"));
+                    beaconStructure.setRange((Double) jObj.get("required_distance"));
                     beaconStructure.setURL((String) jObj.get("URL"));
                     beaconStructure.setContentText1((String) jObj.get("contentText1"));
 
@@ -271,5 +292,9 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 
     public static void setGoOn(boolean goOn) {
         ErauVisit.goOn = goOn;
+    }
+
+    public static RegionBootstrap getmRegionBootstrap() {
+        return mRegionBootstrap;
     }
 }

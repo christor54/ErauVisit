@@ -39,11 +39,11 @@ public class RangingActivity extends Activity {
     }    
 
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+        Beacon beaconAnalyzed;
         if (beacons.size() > 0) {
-        	TextView editText = (TextView)RangingActivity.this
-					.findViewById(R.id.rangingText);
-            for (Beacon beacon: beacons) {
-            	logToDisplay("Beacon "+beacon.toString()+" is about "+beacon.getDistance()+" meters away, with Rssi: "+beacon.getRssi() );
+            beaconAnalyzed = MonitoringActivity.findBeaconAnalyzed(beacons, region);
+            if (beaconAnalyzed != null && MonitoringActivity.isTheClosestBeacon(beaconAnalyzed)) {
+                logToDisplay("closestBeacon " + beaconAnalyzed.toString() + " is about " + beaconAnalyzed.getDistance() + " meters away, with Rssi: " + beaconAnalyzed.getRssi());
             }
         }
     }
