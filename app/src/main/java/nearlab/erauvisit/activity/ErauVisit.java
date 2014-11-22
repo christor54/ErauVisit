@@ -8,7 +8,6 @@ import android.util.Log;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
@@ -43,6 +42,7 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
     private final static String NO_LOCAL_SERVER_WELCOME_PAGE_URL ="http://cdn.stateuniversity.com/assets/logos/images/11938/large_db-map.jpg";
 
     public static String DEFAUT_PAGE_URL;
+
     private static final String TAG = "ErauVisit";
     private static boolean goOn=false;
     private static String beacons_json_file_url;
@@ -55,6 +55,7 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
     private static HashMap <String,BeaconStructure> mapKeyBeaconStruct = new HashMap<String, BeaconStructure>();
 	@SuppressWarnings("unused")
 	private static RegionBootstrap mRegionBootstrap;
+    private Region mRegion;
 
     //"Local variables" made global
     List<String> mkeys= new ArrayList<String>();
@@ -66,10 +67,10 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
             DEFAUT_PAGE_URL =LOCAL_SERVER_URL+"welcome_page.html";
         }
         else {
-            beacons_json_file_url = ERAU_SERVER_URL_JSON+"/beacons.json";
+            beacons_json_file_url = ERAU_SERVER_URL_JSON+"beacons.json";
             DEFAUT_PAGE_URL =NO_LOCAL_SERVER_WELCOME_PAGE_URL;
         }
-        beacons_json_file_url=beacons_json_file_url+"/beacons.json";
+        beacons_json_file_url=beacons_json_file_url+"beacons.json";
 
         String mJson;
 
@@ -80,6 +81,12 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
         else {
             mJson = loadJSONFromRaw();
         }
+         mRegion = new Region("backgroundRegion",
+                null, null, null);
+        createBeaconManager();
+        mBackgroundPowerSaver = new BackgroundPowerSaver(this);//Without this line, didRangeBeacon not working
+        mRegionBootstrap = new RegionBootstrap(this, mRegion);
+
 
         //Create the map mapKeyBeaconStruct from the json file
         createMapKeyBeaconStruct(mJson);
@@ -91,8 +98,6 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 
         //Create mBeaconManager with increased scan frequency
         createBeaconManager();
-
-        mBackgroundPowerSaver = new BackgroundPowerSaver(this);
 
 	}
 
@@ -138,8 +143,8 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
 		}
 		try {
             String line =" entered region";
-			Log.d(TAG, "entered region.  starting ranging");
-			mBeaconManager.startRangingBeaconsInRegion(arg0);
+			Log.d(TAG, "entered region :" +arg0.getUniqueId()+"  starting ranging");
+			mBeaconManager.startRangingBeaconsInRegion(mRegion);
 			mBeaconManager.setRangeNotifier(this);
 
 		} catch (RemoteException e) {
@@ -172,22 +177,31 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
     }
 
     private void createListRegions() {
-        for(int i=0; i<mkeys.size();i++ ) {
-            String key =mkeys.get(i);
-            BeaconStructure beaconStructure = mapKeyBeaconStruct.get(key);
-            Region region = new Region(key, Identifier.parse(beaconStructure.getUUID()),
-                    Identifier.parse(String.valueOf(beaconStructure.getMajor())),
-                    Identifier.parse(String.valueOf(beaconStructure.getMinor())));
-            listRegions.add(region);
-        }
+        String key =mkeys.get(1);
+        BeaconStructure beaconStructure=mapKeyBeaconStruct.get(key);
+        Region region = new Region("campus", null,
+                null,
+                null);
+        listRegions.add(region);
+//        String key;
+//        BeaconStructure beaconStructure;
+//        for(int i=0; i<mkeys.size();i++ ) {
+//            key =mkeys.get(i);
+//            BeaconStructure beaconStructure = mapKeyBeaconStruct.get(key);
+//            Region region = new Region(key, Identifier.parse(beaconStructure.getUUID()),
+//                    Identifier.parse(String.valueOf(beaconStructure.getMajor())),
+//                    Identifier.parse(String.valueOf(beaconStructure.getMinor())));
+//            listRegions.add(region);
+//        }
     }
 
     private void createMapKeyBeaconStruct(String mJson) {
         try {
             JSONObject jObject = new JSONObject(mJson);
             Iterator<String> keys=  jObject.keys();
+            String key;
             while(keys.hasNext()){
-                String key = (String) keys.next();
+                key = (String) keys.next();
                 Log.i("JSON key", key);
                 if (jObject.get(key) instanceof JSONObject) {
                     JSONObject jObj= (JSONObject) jObject.get(key);

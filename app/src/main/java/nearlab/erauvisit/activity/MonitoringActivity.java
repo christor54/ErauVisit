@@ -28,7 +28,6 @@ public class MonitoringActivity extends Activity {
     private final static String WELCOME_MESSAGE = "Hi, I will be your guide for the visit :) " +"\n"+"Move around, I will show you cool stuff !";
     private final static String NO_BEACON_MESSAGE = "keep visiting, I will guide you";
 
-
     private Beacon lastBeacon;
     static boolean isActive =false;
 
@@ -58,7 +57,7 @@ public class MonitoringActivity extends Activity {
             webView.restoreState(savedInstanceState);
         else {
             logToDisplay(WELCOME_MESSAGE);
-            openWebPageInWebView(ErauVisit.DEFAUT_PAGE_URL);
+ //           openWebPageInWebView(ErauVisit.DEFAUT_PAGE_URL);
         }
         isActive =true;
 	}
@@ -68,10 +67,6 @@ public class MonitoringActivity extends Activity {
         this.startActivity(myIntent);
 	}
 
-    public void onGoBackMapClicked(View view) {
-        Intent myIntent = new Intent(this, RangingActivity.class);
-        this.startActivity(myIntent);
-    }
 
     @Override 
     protected void onPause() {
@@ -105,6 +100,7 @@ public class MonitoringActivity extends Activity {
        // monitor_text=bs.getContentText1();
         //logToDisplay(monitor_text);
         //openWebPageInWebView(bs.getURL());
+        System.out.println("hi");
     }
 
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
@@ -163,7 +159,7 @@ public class MonitoringActivity extends Activity {
     private static boolean areBeaconsEquals(Beacon beaconAnalyzed, Beacon closestBeacon) {
         boolean areEquals=true;
         for(int i=1;i<3;i++){
-            if(beaconAnalyzed.getIdentifier(i)!=closestBeacon.getIdentifier(i)){
+            if(!beaconAnalyzed.getIdentifier(i).equals(closestBeacon.getIdentifier(i))){
                 areEquals=false;
             }
         }
