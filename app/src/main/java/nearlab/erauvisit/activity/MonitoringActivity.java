@@ -18,6 +18,7 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.Region;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import nearlab.erauvisit.Data.BeaconStructure;
 import nearlab.erauvisit.R;
@@ -57,7 +58,7 @@ public class MonitoringActivity extends Activity {
             webView.restoreState(savedInstanceState);
         else {
             logToDisplay(WELCOME_MESSAGE);
- //           openWebPageInWebView(ErauVisit.DEFAUT_PAGE_URL);
+            openWebPageInWebView(ErauVisit.DEFAUT_PAGE_URL);
         }
         isActive =true;
 	}
@@ -96,11 +97,7 @@ public class MonitoringActivity extends Activity {
     }
 
     public void didEnterRegion(Region region) {
-      //  BeaconStructure bs= ErauVisit.getBSFromRegion(region);
-       // monitor_text=bs.getContentText1();
-        //logToDisplay(monitor_text);
-        //openWebPageInWebView(bs.getURL());
-        System.out.println("hi");
+        System.out.println("Enter region : "+region.getUniqueId());
     }
 
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
@@ -110,9 +107,11 @@ public class MonitoringActivity extends Activity {
 
        //Find the closest beacon
         if (beacons.size() > 0) {
-            beaconAnalyzed=findBeaconAnalyzed(beacons,region);
+           // beaconAnalyzed=findBeaconAnalyzed(beacons,region);
+            Iterator it=beacons.iterator();
+            beaconAnalyzed=(Beacon)it.next();
             if(beaconAnalyzed!=null&&isTheClosestBeacon(beaconAnalyzed)){
-                bs = ErauVisit.getBSFromRegion(region);
+                bs = ErauVisit.getBSFromBeacon(beaconAnalyzed);
                 monitor_text = bs.getContentText1();
                 currentURL = bs.getURL();
                 if(lastURL!=null&&!currentURL.equals(lastURL)) {//IF the web page to displayed was not already displayed
@@ -150,8 +149,8 @@ public class MonitoringActivity extends Activity {
             }
         }
         else {
-            response=false;
             closestBeacon=beaconAnalyzed;
+            response=true;
         }
         return response;
     }

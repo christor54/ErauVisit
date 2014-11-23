@@ -33,7 +33,7 @@ import nearlab.erauvisit.HandleBeaconData.DownloadTask;
 import nearlab.erauvisit.R;
 
 public class ErauVisit extends Application implements BootstrapNotifier, RangeNotifier {
-    private static final boolean do_download_json = false;
+    private static final boolean USE_LOCAL_JSON = true;
     private static final boolean USE_LOCAL_SERVER = false;
     //192.168.2.
     private static final String LOCAL_SERVER_URL = "http://10.33.93.176/erauvisit.com/";
@@ -75,7 +75,7 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
         String mJson;
 
         //Get the json file with the beacon structures
-        if (do_download_json){
+        if (!USE_LOCAL_JSON){
             mJson = downloadJSONFromServer();
         }
         else {
@@ -295,10 +295,17 @@ public class ErauVisit extends Application implements BootstrapNotifier, RangeNo
         ErauVisit.mapKeyBeaconStruct = mapKeyBeaconStruct;
     }
 
+    @Deprecated
     public static BeaconStructure getBSFromRegion(Region region){
         String key = region.getUniqueId();
         return mapKeyBeaconStruct.get(key);
     }
+
+    public static BeaconStructure getBSFromBeacon(Beacon beacon){
+        String key = "beacon_"+ String.valueOf(beacon.getId3());
+        return mapKeyBeaconStruct.get(key);
+    }
+
 
     public static boolean isGoOn() {
         return goOn;
