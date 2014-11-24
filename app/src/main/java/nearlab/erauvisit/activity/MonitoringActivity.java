@@ -110,29 +110,17 @@ public class MonitoringActivity extends Activity {
            // beaconAnalyzed=findBeaconAnalyzed(beacons,region);
             Iterator it=beacons.iterator();
             beaconAnalyzed=(Beacon)it.next();
-            if(beaconAnalyzed!=null&&isTheClosestBeacon(beaconAnalyzed)){
-                bs = ErauVisit.getBSFromBeacon(beaconAnalyzed);
+            bs = ErauVisit.getBSFromBeacon(beaconAnalyzed);
+            //if the beacon is the closest and is in the required range
+            if(beaconAnalyzed!=null&&isTheClosestBeacon(beaconAnalyzed)&&closestBeacon.getDistance() <= bs.getRange()){
                 monitor_text = bs.getContentText1();
                 currentURL = bs.getURL();
-                if(lastURL!=null&&!currentURL.equals(lastURL)) {//IF the web page to displayed was not already displayed
+                //If the web page to displayed was not already displayed
+                if(!currentURL.equals(lastURL)) {
                     logToDisplay(monitor_text);
                     openWebPageInWebView(currentURL);
                 }
             }
-
-//            //Check that the beacon is within the required distance
-//            if(closestBeacon!=null) {
-//                if (region.matchesBeacon(closestBeacon) && closestBeacon.getDistance() <= ErauVisit.getBSFromRegion(region).getRange()) {
-//;
-//                } else {
-//                    if (closestBeacon.getDistance() < (ErauVisit.getBSFromRegion(region).getRange() * 1.35))
-//                        ;
-//                    else {
-//                        monitor_text = NO_BEACON_MESSAGE;
-//                        currentURL = ErauVisit.DEFAUT_PAGE_URL;
-//                    }
-//                }
-//            }
         }
     }
 
@@ -192,7 +180,6 @@ public class MonitoringActivity extends Activity {
 
 
     public void didExitRegion(Region region) {
-        displayDefaultView();
     }
 
     @Override

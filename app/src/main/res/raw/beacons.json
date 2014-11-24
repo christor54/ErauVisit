@@ -14,7 +14,7 @@
 		"major" : 1,
 		"minor" : 2,
 		"required_distance" : 2.0,
-        "URL":"http://www.earl.erau.edu/lab/ibeacon/beacon_2.html",
+        "URL":"http://192.168.1.9/erauvisit.com/ibeacon_presentation.html",
         "contentText1":"Here is developed the iBeacon project"
 	},
 	"beacon_3" :
