@@ -2,36 +2,39 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="nearlab.erauvisit" >
 
-    <application
-        android:icon="@drawable/eagle_icon"
-        android:label="@string/app_name"
-        android:launchMode="singleInstance"
-        android:allowBackup="true"
-        android:name=".activity.ErauVisit"
-        android:theme="@style/AppTheme">
-        <activity
-            android:name=".activity.MonitoringActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".activity.RangingActivity"
-            android:label="@string/app_name" >
-        </activity>
-    </application>
-
     <uses-sdk
         android:minSdkVersion="18"
         android:targetSdkVersion="18" />
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <application
+        android:name="nearlab.erauvisit.activity.ErauVisit"
+        android:allowBackup="true"
+        android:icon="@drawable/eagle_icon"
+        android:label="@string/app_name"
+        android:launchMode="singleInstance"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="nearlab.erauvisit.activity.MonitoringActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="nearlab.erauvisit.activity.RangingActivity"
+            android:label="@string/app_name" >
+        </activity>
+
+    </application>
+
 </manifest>
-
-

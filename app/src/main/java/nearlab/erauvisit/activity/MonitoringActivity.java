@@ -17,8 +17,10 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.Region;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import nearlab.erauvisit.Data.BeaconStructure;
 import nearlab.erauvisit.R;
@@ -101,27 +103,92 @@ public class MonitoringActivity extends Activity {
     }
 
     public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-        BeaconStructure bs;
-        Beacon beaconAnalyzed;
-        String currentURL,monitor_text;
+        doMethodInRangeThenClosest(beacons, region);
+    }
 
-       //Find the closest beacon
+    private void doMethodInRangeThenClosest(Collection<Beacon> beacons, Region region) {
         if (beacons.size() > 0) {
-           // beaconAnalyzed=findBeaconAnalyzed(beacons,region);
-            Iterator it=beacons.iterator();
-            beaconAnalyzed=(Beacon)it.next();
+            BeaconStructure bs;
+            List<Beacon> listBeaconsInRange ;
+            Beacon beaconAnalyzed;
+            String currentURL, monitor_text;
+
+            listBeaconsInRange=getListBeaconsInRange(beacons);
+            if(listBeaconsInRange.size()==0);
+            else if(listBeaconsInRange.size()==1){
+                bs = ErauVisit.getBSFromBeacon(listBeaconsInRange.get(0));
+                monitor_text = bs.getContentText1();
+                currentURL = bs.getURL();
+
+                //If the web page to displayed was not already displayed
+                if (!currentURL.equals(lastURL)) {
+                    logToDisplay(monitor_text);
+                    openWebPageInWebView(currentURL);
+                }
+            }
+            else{
+                //Find the closest beacon
+                beaconAnalyzed = getClosestBeacon(beacons);
+                bs = ErauVisit.getBSFromBeacon(beaconAnalyzed);
+                monitor_text = bs.getContentText1();
+                currentURL = bs.getURL();
+
+                //If the web page to displayed was not already displayed
+                if (!currentURL.equals(lastURL)) {
+                    logToDisplay(monitor_text);
+                    openWebPageInWebView(currentURL);
+                }
+
+            }
+
+        }
+    }
+
+    private  List<Beacon> getListBeaconsInRange(Collection<Beacon> beacons) {
+        List<Beacon> listBeaconsInRange = new ArrayList<Beacon>();
+        BeaconStructure bs;
+        for(Beacon beacon:beacons){
+            bs = ErauVisit.getBSFromBeacon(beacon);
+            if(beacon.getDistance()<=bs.getRange()){
+                listBeaconsInRange.add(beacon);
+            }
+        }
+        return listBeaconsInRange;
+    }
+
+
+    private void doMethodClosestThenInRange(Collection<Beacon> beacons, Region region){
+        if (beacons.size() > 0) {
+            BeaconStructure bs;
+            Beacon beaconAnalyzed;
+            String currentURL,monitor_text;
+
+            //Find the closest beacon
+            beaconAnalyzed = getClosestBeacon(beacons);
             bs = ErauVisit.getBSFromBeacon(beaconAnalyzed);
             //if the beacon is the closest and is in the required range
-            if(beaconAnalyzed!=null&&isTheClosestBeacon(beaconAnalyzed)&&closestBeacon.getDistance() <= bs.getRange()){
+            if (beaconAnalyzed != null && beaconAnalyzed.getDistance() <= bs.getRange()) {
                 monitor_text = bs.getContentText1();
                 currentURL = bs.getURL();
                 //If the web page to displayed was not already displayed
-                if(!currentURL.equals(lastURL)) {
+                if (!currentURL.equals(lastURL)) {
                     logToDisplay(monitor_text);
                     openWebPageInWebView(currentURL);
                 }
             }
         }
+    }
+
+    private Beacon getClosestBeacon(Collection<Beacon> beacons) {
+        Beacon closestBeacon;
+        Iterator<Beacon> it = beacons.iterator();
+        closestBeacon=it.next();
+        for(Beacon beacon:beacons){
+            if(beacon.getDistance()<=closestBeacon.getDistance()){
+                closestBeacon=beacon;
+            }
+        }
+        return closestBeacon;
     }
 
     public static boolean isTheClosestBeacon(Beacon beaconAnalyzed) {
